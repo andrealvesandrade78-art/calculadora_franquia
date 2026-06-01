@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Viabilidade — Refuturiza Campus</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F3EE;
+    --surface: #FFFFFF;
+    --surface2: #EDEAE3;
+    --border: #D6D2C8;
+    --border-light: #E8E5DE;
+    --text: #1A1916;
+    --text-muted: #7A7771;
+    --text-hint: #ABA9A3;
+    --green: #1A6B4A;
+    --green-bg: #E8F5ED;
+    --green-border: #A3D4B8;
+    --red: #8B2323;
+    --red-bg: #FAECEC;
+    --red-border: #DFA5A5;
+    --amber: #7A4E00;
+    --amber-bg: #FDF3DC;
+    --amber-border: #E8C97A;
+    --accent: #1A6B4A;
+    --mono: 'DM Mono', monospace;
+    --display: 'Syne', sans-serif;
+    --body: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  header {
+    background: var(--text);
+    color: #F5F3EE;
+    padding: 2rem 3rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .header-left h1 {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #F5F3EE;
+    line-height: 1.1;
+  }
+
+  .header-left p {
+    font-size: 13px;
+    color: #9A9891;
+    margin-top: 6px;
+    font-weight: 300;
+  }
+
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green);
+    color: #E8F5ED;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 99px;
+    margin-top: 10px;
+  }
+
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+  }
+
+  .preset-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 2rem;
+  }
+
+  .preset-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+  }
+
+  .preset-btn {
+    font-family: var(--body);
+    font-size: 13px;
+    font-weight: 400;
+    padding: 7px 16px;
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .preset-btn:hover {
+    border-color: var(--text);
+    color: var(--text);
+    background: var(--surface2);
+  }
+
+  .preset-btn.active {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+    font-weight: 500;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 1.5rem;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-hint);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-light);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+
+  .form-grid-2 { grid-template-columns: 1fr 1fr; }
+  .form-grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .field label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+    line-height: 1.3;
+  }
+
+  .field input {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+  }
+
+  .field input:focus {
+    border-color: var(--text);
+    box-shadow: 0 0 0 3px rgba(26,25,22,0.06);
+  }
+
+  .spacer { margin-top: 1.25rem; }
+
+  .result-sticky {
+    position: sticky;
+    top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .kpi-main {
+    background: var(--text);
+    color: var(--bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 0;
+  }
+
+  .kpi-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-hint);
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+
+  .kpi-main .kpi-label { color: #9A9891; }
+
+  .kpi-value {
+    font-family: var(--display);
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -1px;
+    color: var(--text);
+  }
+
+  .kpi-main .kpi-value { color: #F5F3EE; }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.red { color: var(--red); }
+
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--text-hint);
+    margin-top: 4px;
+  }
+
+  .kpi-main .kpi-sub { color: #7A7872; }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .kpi-small {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 1rem;
+  }
+
+  .kpi-small .kpi-label { font-size: 10px; }
+  .kpi-small .kpi-value { font-size: 20px; letter-spacing: -0.5px; }
+
+  .bar-section { margin-top: 4px; }
+
+  .bar-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-hint);
+    font-family: var(--mono);
+    margin-bottom: 6px;
+  }
+
+  .bar-track {
+    height: 8px;
+    background: var(--bg);
+    border-radius: 99px;
+    overflow: hidden;
+    border: 1px solid var(--border-light);
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--green);
+    transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .bar-fill.red { background: var(--red); }
+
+  .bar-caption {
+    font-size: 11px;
+    color: var(--green);
+    font-family: var(--mono);
+    margin-top: 4px;
+    text-align: right;
+  }
+
+  .bar-caption.red { color: var(--red); }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border-light);
+    margin: 1.5rem 0;
+  }
+
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-top: 1.5rem;
+  }
+
+  .table-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .table-header span {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-hint);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .table-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-hint);
+    padding: 10px 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  thead th:first-child { text-align: left; }
+
+  tbody td {
+    padding: 10px 16px;
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: middle;
+  }
+
+  tbody td:first-child {
+    text-align: left;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  tbody tr:hover td { background: var(--bg); }
+
+  tbody tr.be-row td {
+    background: var(--green-bg);
+    color: var(--green);
+    font-weight: 500;
+    border-bottom: 1px solid var(--green-border);
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: var(--mono);
+  }
+
+  .tag-ok { background: var(--green-bg); color: var(--green); }
+  .tag-bad { background: var(--red-bg); color: var(--red); }
+  .tag-be { background: var(--text); color: var(--bg); }
+
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 12px;
+    color: var(--text-hint);
+    font-family: var(--mono);
+    border-top: 1px solid var(--border-light);
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+    .result-sticky { position: static; }
+    .form-grid { grid-template-columns: 1fr 1fr; }
+    .form-grid-4 { grid-template-columns: 1fr 1fr; }
+    header { padding: 1.5rem; }
+    .main { padding: 1.5rem 1rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Calculadora de Viabilidade<br>de Turmas</h1>
+    <p>Business Plan — Refuturiza Campus 2026 · Bela Vista</p>
+    <div class="header-badge">
+      <span style="width:6px;height:6px;background:#A3D4B8;border-radius:50%;display:inline-block;"></span>
+      Lucro Presumido · Tempo real
+    </div>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- Tab Navigation -->
+  <div style="display:flex;gap:4px;margin-bottom:1.5rem;background:var(--surface2);border-radius:12px;padding:4px;width:fit-content;">
+    <button id="tab-calc" onclick="switchTab('calc')" style="font-family:var(--body);font-size:13px;font-weight:500;padding:8px 20px;border:none;border-radius:9px;cursor:pointer;background:var(--text);color:var(--bg);transition:all 0.15s;">Calculadora</button>
+    <button id="tab-metas" onclick="switchTab('metas')" style="font-family:var(--body);font-size:13px;font-weight:500;padding:8px 20px;border:none;border-radius:9px;cursor:pointer;background:transparent;color:var(--text-muted);transition:all 0.15s;">Metas de Vendas</button>
+  </div>
+
+  <!-- Tab: Calculadora -->
+  <div id="panel-calc">
+  <div class="preset-row">
+    <button class="preset-btn active" onclick="loadPreset('custom', this)">Personalizado</button>
+    <button class="preset-btn" onclick="loadPreset('arCond', this)">Ar Condicionado</button>
+    <button class="preset-btn" onclick="loadPreset('sobrancelha', this)">Design de Sobrancelha</button>
+    <button class="preset-btn" onclick="loadPreset('cilios', this)">Extensão de Cílios</button>
+    <button class="preset-btn" onclick="loadPreset('eletrica', this)">Instalações Elétricas</button>
+    <button class="preset-btn" onclick="loadPreset('camera', this)">Câmera</button>
+    <button class="preset-btn" onclick="loadPreset('eja', this)">EJA</button>
+    <button class="preset-btn" onclick="loadPreset('tec', this)">Técnico Integrado</button>
+    <button class="preset-btn" onclick="loadPreset('sup', this)">Ensino Superior</button>
+  </div>
+
+  <div class="layout">
+    <div>
+      <div class="card">
+        <div class="section-label">Receitas</div>
+        <div class="form-grid form-grid-4">
+          <div class="field">
+            <label>Preço ticket NCDT (R$)</label>
+            <input type="number" id="preco_ncdt" value="699" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Preço ticket CDT (R$)</label>
+            <input type="number" id="preco_cdt" value="0" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>% alunos com CDT</label>
+            <input type="number" id="pct_cdt" value="0" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Alunos na turma</label>
+            <input type="number" id="alunos_turma" value="15" min="1" oninput="calc()">
+          </div>
+        </div>
+        <div class="form-grid spacer">
+          <div class="field">
+            <label>Preço apostila (R$) — 0 se inclusa</label>
+            <input type="number" id="preco_apostila" value="0" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Inadimplência (%)</label>
+            <input type="number" id="inadimplencia" value="10" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Royalties sobre rec. líquida (%)</label>
+            <input type="number" id="royalties" value="0" oninput="calc()">
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-label">Custos fixos mensais (por turma ativa)</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Instrutor / facilitador (R$/mês)</label>
+            <input type="number" id="instrutor" value="1200" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Insumos didáticos (R$/mês)</label>
+            <input type="number" id="insumos" value="696" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Serviços de terceiros (R$/mês)</label>
+            <input type="number" id="servicos" value="1220" oninput="calc()">
+          </div>
+        </div>
+        <div class="form-grid spacer">
+          <div class="field">
+            <label>Segurança / outros fixos (R$/mês)</label>
+            <input type="number" id="outros_fixos" value="25" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Tráfego pago / mkt digital (R$/mês)</label>
+            <input type="number" id="mkt" value="100" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Comissão de vendas (R$/aluno)</label>
+            <input type="number" id="comissao" value="50" oninput="calc()">
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-label">Equipe de vendas</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Qtde de vendedores</label>
+            <input type="number" id="qtde_vendedores" value="1" min="0" step="1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Salário base (R$/mês)</label>
+            <input type="number" id="salario_vendedor" value="1949" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Encargos sobre salário (%)</label>
+            <input type="number" id="encargos_vendedor" value="55" readonly style="background:var(--surface2);color:var(--text-hint);cursor:not-allowed;border-color:var(--border-light);">
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="section-label">Impostos — Lucro Presumido</div>
+        <div style="background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:8px;padding:10px 14px;margin-bottom:12px;">
+          <p style="font-size:11px;color:var(--amber);line-height:1.6;">
+            <strong>Composição fiscal aplicada automaticamente:</strong> as notas dos cursos são emitidas como <strong>70% produto</strong> (apostila — isento) e <strong>30% serviço</strong>. <strong>PIS, COFINS e ISS</strong> incidem apenas sobre os 30% de serviço. A tarifa financeira e a inadimplência incidem sobre 100% da receita bruta.
+          </p>
+        </div>
+        <div class="form-grid form-grid-4">
+          <div class="field">
+            <label>PIS (%)</label>
+            <input type="number" id="pis" value="0.65" step="0.01" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>COFINS (%)</label>
+            <input type="number" id="cofins" value="3" step="0.01" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>ISS (%)</label>
+            <input type="number" id="iss" value="5" step="0.01" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Tarifa financeira (%)</label>
+            <input type="number" id="tarifa" value="1.5" step="0.01" oninput="calc()">
+          </div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <span>Simulação por quantidade de alunos</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Alunos</th>
+                <th>Receita bruta</th>
+                <th>Deduções</th>
+                <th>Rec. líquida</th>
+                <th>Custos totais</th>
+                <th>Resultado</th>
+                <th>Margem %</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-sticky">
+      <div class="kpi-main">
+        <div class="kpi-label">Mínimo de alunos (break-even)</div>
+        <div class="kpi-value" id="kpi-be" style="color:#F5F3EE;">—</div>
+        <div class="kpi-sub" id="kpi-be-sub">alunos para lucro zero</div>
+        <div class="bar-section" style="margin-top:1rem;">
+          <div class="bar-meta">
+            <span>0</span>
+            <span id="bar-max-lbl">30 alunos</span>
+          </div>
+          <div class="bar-track" style="background:#2C2C2A;border-color:#3A3A37;">
+            <div class="bar-fill" id="bar-fill" style="width:0%;"></div>
+          </div>
+          <div class="bar-caption" id="bar-caption"></div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-small">
+          <div class="kpi-label">Custo fixo / turma</div>
+          <div class="kpi-value" id="kpi-custo">—</div>
+          <div class="kpi-sub">R$ / mês</div>
+        </div>
+        <div class="kpi-card kpi-small">
+          <div class="kpi-label">Margem / aluno</div>
+          <div class="kpi-value" id="kpi-margem">—</div>
+          <div class="kpi-sub">R$ líquido</div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Alunos para 20% de margem</div>
+        <div class="kpi-value green" id="kpi-meta20">—</div>
+        <div class="kpi-sub">alunos para turma rentável</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Resultado com <span id="kpi-n-label">15</span> alunos</div>
+        <div class="kpi-value" id="kpi-15">—</div>
+        <div class="kpi-sub" id="kpi-15-sub">R$ / mês</div>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--text-hint);letter-spacing:0.06em;text-transform:uppercase;">Margem</span>
+          <span style="font-family:var(--mono);font-size:16px;font-weight:700;" id="kpi-15-margem">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card" style="margin-top:1.5rem;">
+    <div class="table-header">
+      <span>Alunos necessários por curso para bater o faturamento consolidado orçado</span>
+    </div>
+    <div style="padding:1rem 1.5rem 1rem;border-bottom:1px solid var(--border-light);">
+      <p style="font-size:12px;color:var(--text-muted);line-height:1.6;">
+        O faturamento total orçado (DRE Consolidada) é distribuído entre os cursos proporcionalmente ao seu peso no BP.
+        Cada célula mostra quantos alunos aquele curso precisa ter naquele mês para cumprir sua parcela.
+        O preço ticket e a inadimplência usados são os do painel acima — <strong>ajuste os campos do curso selecionado para simular cenários.</strong>
+      </p>
+    </div>
+    <div class="table-wrap">
+      <table id="meta-consolidada" style="table-layout:fixed;min-width:900px;">
+        <thead id="meta-thead"></thead>
+        <tbody id="meta-table-body"></tbody>
+        <tfoot id="meta-tfoot"></tfoot>
+      </table>
+    </div>
+  </div>
+
+</div> <!-- /panel-calc -->
+
+  <!-- Tab: Metas de Vendas -->
+  <div id="panel-metas" style="display:none;">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:1.5rem;">
+      <div class="kpi-card">
+        <div class="kpi-label">Break-even da turma</div>
+        <div class="kpi-value" id="mv-be" style="font-size:28px;">—</div>
+        <div class="kpi-sub">alunos para cobrir todos os custos</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Gatilho mínimo de comissão</div>
+        <div class="kpi-value green" id="mv-gatilho" style="font-size:28px;">14</div>
+        <div class="kpi-sub">a partir de 14 alunos (fixo)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Meta cheia (turma configurada)</div>
+        <div class="kpi-value" id="mv-meta-cheia" style="font-size:28px;color:var(--accent);">—</div>
+        <div class="kpi-sub" id="mv-meta-cheia-sub">alunos definidos na calculadora</div>
+      </div>
+    </div>
+
+    <!-- Configuração de comissão -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="section-label">Configuração do plano de comissão</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:1rem;">
+        <div class="field">
+          <label>Faixa 1 — até 20 alunos (R$/aluno)</label>
+          <input type="number" id="com_f1" value="30" oninput="calcMetas()">
+        </div>
+        <div class="field">
+          <label>Faixa 2 — 21 a 25 alunos (R$/aluno)</label>
+          <input type="number" id="com_f2" value="40" oninput="calcMetas()">
+        </div>
+        <div class="field">
+          <label>Faixa 3 — acima de 25 alunos (R$/aluno)</label>
+          <input type="number" id="com_f3" value="50" oninput="calcMetas()">
+        </div>
+        <div class="field">
+          <label>Bônus de turma cheia (R$)</label>
+          <input type="number" id="com_bonus" value="0" oninput="calcMetas()">
+        </div>
+      </div>
+      <div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:8px;padding:10px 14px;">
+        <p style="font-size:11px;color:var(--green);line-height:1.7;" id="mv-regra-txt">—</p>
+      </div>
+    </div>
+
+    <!-- Tabela de gatilhos -->
+    <div class="table-card">
+      <div class="table-header">
+        <span>Simulação de resultados por faixa de alunos matriculados</span>
+        <span style="font-size:11px;color:var(--text-hint);">valores em R$/mês</span>
+      </div>
+      <div class="table-wrap">
+        <table id="metas-table">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding:10px 16px;" rowspan="2">Faixa</th>
+              <th rowspan="2">Alunos</th>
+              <th rowspan="2">Receita bruta</th>
+              <th colspan="2" style="background:var(--surface2);border-bottom:1px solid var(--border-light);">Antes da comissão</th>
+              <th colspan="3" style="background:var(--green-bg);border-bottom:1px solid var(--green-border);">Vendedor</th>
+              <th colspan="3" style="background:var(--amber-bg);border-bottom:1px solid var(--amber-border);">Após comissão</th>
+              <th rowspan="2">Status</th>
+            </tr>
+            <tr>
+              <th style="background:var(--surface2);">Resultado empresa</th>
+              <th style="background:var(--surface2);">Margem</th>
+              <th style="background:var(--green-bg);color:var(--green);">Comissão / vendedor</th>
+              <th style="background:var(--green-bg);color:var(--green);">Ganho total</th>
+              <th style="background:var(--green-bg);color:var(--green);">% receita</th>
+              <th style="background:var(--amber-bg);color:var(--amber);">Resultado empresa</th>
+              <th style="background:var(--amber-bg);color:var(--amber);">Margem final</th>
+              <th style="background:var(--amber-bg);color:var(--amber);">Impacto comissão</th>
+            </tr>
+          </thead>
+          <tbody id="metas-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Sugestão de política -->
+    <div class="card" style="margin-top:1.5rem;">
+      <div class="section-label">Política de comissão sugerida</div>
+      <div id="mv-politica" style="font-size:13px;color:var(--text-muted);line-height:1.8;"></div>
+    </div>
+
+  </div> <!-- /panel-metas -->
+
+</div>Refuturiza Campus · BP 2026 v2 Bela Vista · Lucro Presumido · Calculadora de Viabilidade de Turmas</footer>
+
+<script>
+const presets = {
+  arCond:      { preco_ncdt:699, preco_cdt:0, pct_cdt:0, preco_apostila:0,      inadimplencia:10, royalties:0,  instrutor:1200, insumos:696, servicos:1220, outros_fixos:25, mkt:100,  comissao:50, qtde_vendedores:1, salario_vendedor:1949, encargos_vendedor:55, pis:0.65, cofins:3, iss:5, tarifa:1.5, alunos_turma:15  },
+  sobrancelha: { preco_ncdt:699, preco_cdt:0, pct_cdt:0, preco_apostila:0,      inadimplencia:10, royalties:10, instrutor:670,  insumos:360, servicos:0,    outros_fixos:25, mkt:100,  comissao:50, qtde_vendedores:1, salario_vendedor:1949, encargos_vendedor:55, pis:0.65, cofins:3, iss:5, tarifa:1.5, alunos_turma:15  },
+  cilios:      { preco_ncdt:699, preco_cdt:0, pct_cdt:0, preco_apostila:0,      inadimplencia:10, royalties:10, instrutor:670,  insumos:360, servicos:0,    outros_fixos:25, mkt:100,  comissao:50, qtde_vendedores:1, salario_vendedor:1949, encargos_vendedor:55, pis:0.65, cofins:3, iss:5, tarifa:1.5, alunos_turma:15  },
+  eletrica:    { preco_ncdt:699, preco_cdt:0, pct_cdt:0, preco_apostila:0,      inadimplencia:10, royalties:0,  instrutor:1200, insumos:602, servicos:1220, outros_fixos:25, mkt:100,  comissao:50, qtde_vendedores:1, salario_vendedor:1949, encargos_vendedor:55, pis:0.65, cofins:3, iss:5, tarifa:1.5, alunos_turma:15  },
+  camera:      { preco_ncdt:699, preco_cdt:0, pct_cdt:0, preco_apostila:0,      inadimplencia:10, royalties:0,  instrutor:600,  insumos:100, servicos:0,    outros_fixos:25, mkt:100,  comissao:50, qtde_vendedores:1, salario_vendedor:1949, encargos_vendedor:55, pis:0.65, cofins:3, iss:5, tarifa:1.5, alunos_turma:15  },
+  eja:         { preco_ncdt:699, preco_cdt:0, pct_cdt:0, preco_apostila:0,      inadimplencia:5,  royalties:0,  instrutor:1080, insumos:0,   servicos:0,    outros_fixos:0,  mkt:200,  comissao:0,  qtde_vendedores:1, salario_vendedor:1949, encargos_vendedor:55, pis:0.65, cofins:3, iss:5, tarifa:1.5, alunos_turma:40  },
+  tec:         { preco_ncdt:429, preco_cdt:0, pct_cdt:0, preco_apostila:343.20, inadimplencia:10, royalties:0,  instrutor:6000, insumos:602, servicos:0,    outros_fixos:0,  mkt:200,  comissao:30, qtde_vendedores:2, salario_vendedor:2700, encargos_vendedor:55, pis:0.65, cofins:3, iss:5, tarifa:1.5, alunos_turma:30  },
+  sup:         { preco_ncdt:68,  preco_cdt:0, pct_cdt:0, preco_apostila:0,      inadimplencia:5,  royalties:0,  instrutor:0,    insumos:0,   servicos:0,    outros_fixos:0,  mkt:1500, comissao:50, qtde_vendedores:2, salario_vendedor:2075, encargos_vendedor:55, pis:0.65, cofins:3, iss:5, tarifa:1.5, alunos_turma:120 },
+};
+
+const orcadoBP = {
+  arCond:      [0,0,0,10485,20970,20970,20970,31455,31455,31455,31455,31455],
+  sobrancelha: [0,0,0,10485,20970,20970,20970,20970,31455,31455,31455,31455],
+  cilios:      [0,0,0,10485,10485,10485,10485,20970,20970,20970,20970,20970],
+  eletrica:    [0,0,0,10485,10485,10485,20970,20970,20970,31455,31455,31455],
+  camera:      [0,0,0,10485,10485,10485,20970,20970,20970,20970,20970,20970],
+  eja:         [0,0,0,0,0,3495,6990,10485,13980,17475,20970,27960],
+  tec:         [0,0,0,0,0,12870,68640,128700,205920,321750,321750,321750],
+  sup:         [4276,6413,8551,8968,9385,9802,10219,10219,10219,10219,10219,10219],
+  custom:      [0,0,0,0,0,0,0,0,0,0,0,0],
+};
+
+const cursoNomes = {
+  arCond:'Ar Condicionado', sobrancelha:'Design de Sobrancelha', cilios:'Extensão de Cílios',
+  eletrica:'Instalações Elétricas', camera:'Câmera',
+  eja:'EJA', tec:'Técnico Integrado', sup:'Ensino Superior', custom:'Personalizado'
+};
+
+let cursoAtual = 'custom';
+
+function loadPreset(key, btn) {
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  cursoAtual = key;
+  if (key !== 'custom') {
+    const p = presets[key];
+    for (const [k, v] of Object.entries(p)) {
+      const el = document.getElementById(k);
+      if (el) el.value = v;
+    }
+  }
+  calc();
+}
+
+function gv(id) { return parseFloat(document.getElementById(id).value) || 0; }
+
+function fmtR(n) {
+  const abs = Math.abs(Math.round(n));
+  const str = 'R$ ' + abs.toLocaleString('pt-BR');
+  return n < 0 ? '(' + str + ')' : str;
+}
+
+function fmtN(n) { return Math.round(n).toLocaleString('pt-BR'); }
+
+function calcRow(n) {
+  const preco_ncdt = gv('preco_ncdt');
+  const preco_cdt  = gv('preco_cdt');
+  const pct_cdt    = gv('pct_cdt') / 100;
+  const preco_apost = gv('preco_apostila');
+  const inadim     = gv('inadimplencia') / 100;
+  const roy        = gv('royalties') / 100;
+  const instrutor  = gv('instrutor');
+  const insumos    = gv('insumos');
+  const servicos   = gv('servicos');
+  const outros     = gv('outros_fixos');
+  const mkt        = gv('mkt');
+  const comissao   = gv('comissao');
+  const qtde_vend  = gv('qtde_vendedores');
+  const sal_vend   = gv('salario_vendedor');
+  const enc_vend   = gv('encargos_vendedor') / 100;
+  const custo_vendedores = qtde_vend * sal_vend * (1 + enc_vend);
+  const pis        = gv('pis') / 100;
+  const cofins     = gv('cofins') / 100;
+  const iss        = gv('iss') / 100;
+  const tarifa     = gv('tarifa') / 100;
+
+  const n_ncdt = Math.round(n * (1 - pct_cdt));
+  const n_cdt  = n - n_ncdt;
+  const rec_mat  = n_ncdt * preco_ncdt + n_cdt * preco_cdt;
+  const rec_apost = n * preco_apost;
+  const rec_bruta = rec_mat + rec_apost;
+
+  // Notas emitidas: 70% produto (sem PIS/COFINS/ISS) e 30% serviço (com PIS, COFINS e ISS)
+  // PIS, COFINS e ISS incidem apenas sobre 30% da receita (parcela serviço)
+  // Tarifa financeira e inadimplência incidem sobre 100% da receita bruta
+  const rec_servico = rec_bruta * 0.30;
+  const ded = rec_bruta * (tarifa + inadim) + rec_servico * (pis + cofins + iss);
+  const rec_liq1 = rec_bruta - ded;
+  const rec_liq  = rec_liq1 * (1 - roy);
+
+  const custo_fixo = instrutor + insumos + servicos + outros + mkt + custo_vendedores;
+  const custo_var  = n * comissao;
+  const custo_total = custo_fixo + custo_var;
+
+  const resultado = rec_liq - custo_total;
+  return { rec_bruta, ded, rec_liq, custo_total, resultado, custo_fixo };
+}
+
+function calc() {
+  const maxA = 60;
+  const steps = [1,2,3,4,5,6,7,8,9,10,12,14,15,16,18,20,22,25,28,30,35,40,45,50,55,60];
+
+  let be = null;
+  for (let a = 1; a <= maxA; a++) {
+    if (calcRow(a).resultado >= 0) { be = a; break; }
+  }
+
+  let meta20 = null;
+  for (let a = 1; a <= maxA; a++) {
+    const r = calcRow(a);
+    if (r.rec_bruta > 0 && r.resultado / r.rec_bruta >= 0.20) { meta20 = a; break; }
+  }
+
+  const cf = calcRow(1).custo_fixo;
+
+  const pct_cdt = gv('pct_cdt')/100;
+  const precoEf = gv('preco_ncdt')*(1-pct_cdt) + gv('preco_cdt')*pct_cdt + gv('preco_apostila');
+  // PIS, COFINS e ISS incidem apenas sobre 30% (serviço); tarifa sobre 100%
+  const impostosSobreServico = (gv('pis') + gv('cofins') + gv('iss')) / 100 * 0.30;
+  const tax = impostosSobreServico + gv('tarifa')/100 + gv('inadimplencia')/100;
+  const roy = gv('royalties')/100;
+  const margUnit = precoEf * (1 - tax) * (1 - roy) - gv('comissao');
+
+  document.getElementById('kpi-be').textContent = be !== null ? be + ' alunos' : '> '+maxA;
+  document.getElementById('kpi-custo').textContent = 'R$ ' + Math.round(cf).toLocaleString('pt-BR');
+  document.getElementById('kpi-margem').textContent = 'R$ ' + Math.round(margUnit).toLocaleString('pt-BR');
+  document.getElementById('kpi-meta20').textContent = meta20 !== null ? meta20 + ' alunos' : '> '+maxA;
+
+  const nAlunos = Math.max(1, gv('alunos_turma') || 15);
+  document.getElementById('kpi-n-label').textContent = nAlunos;
+  const r15 = calcRow(nAlunos);
+  const kpi15 = document.getElementById('kpi-15');
+  kpi15.textContent = fmtR(r15.resultado);
+  kpi15.className = 'kpi-value ' + (r15.resultado >= 0 ? 'green' : 'red');
+  document.getElementById('kpi-15-sub').textContent = r15.resultado >= 0 ? 'lucro com ' + nAlunos + ' alunos' : 'prejuízo com ' + nAlunos + ' alunos';
+  const margem15 = r15.rec_bruta > 0 ? (r15.resultado / r15.rec_bruta * 100) : 0;
+  const kpiMargem = document.getElementById('kpi-15-margem');
+  kpiMargem.textContent = margem15.toFixed(1) + '%';
+  kpiMargem.style.color = margem15 >= 0 ? 'var(--green)' : 'var(--red)';
+
+  const barMax = Math.max(30, be !== null ? be + 8 : 35);
+  document.getElementById('bar-max-lbl').textContent = barMax + ' alunos';
+  const bf = document.getElementById('bar-fill');
+  const bc = document.getElementById('bar-caption');
+  if (be !== null) {
+    const pct = Math.min(100, (be / barMax) * 100);
+    bf.style.width = pct + '%';
+    bf.className = 'bar-fill';
+    bc.textContent = Math.round(pct) + '% da capacidade amostrada';
+    bc.className = 'bar-caption';
+  } else {
+    bf.style.width = '100%';
+    bf.className = 'bar-fill red';
+    bc.textContent = 'Sem break-even em ' + maxA + ' alunos';
+    bc.className = 'bar-caption red';
+  }
+
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+  for (const a of steps) {
+    const r = calcRow(a);
+    const isBe = be !== null && a === be;
+    let tag, tagClass;
+    if (isBe) { tag = 'Break-even'; tagClass = 'tag-be'; }
+    else if (r.resultado > 0) { tag = 'Viável'; tagClass = 'tag-ok'; }
+    else { tag = 'Prejuízo'; tagClass = 'tag-bad'; }
+
+    const tr = document.createElement('tr');
+    if (isBe) tr.className = 'be-row';
+    const margem = r.rec_bruta > 0 ? (r.resultado / r.rec_bruta * 100) : 0;
+    const margemCor = margem >= 0 ? 'var(--green)' : 'var(--red)';
+    tr.innerHTML = `
+      <td>${a} alunos</td>
+      <td>${fmtR(r.rec_bruta)}</td>
+      <td>${fmtR(r.ded)}</td>
+      <td>${fmtR(r.rec_liq)}</td>
+      <td>${fmtR(r.custo_total)}</td>
+      <td style="font-weight:500;color:${r.resultado>=0?'var(--green)':'var(--red)'}">${fmtR(r.resultado)}</td>
+      <td style="font-weight:500;color:${margemCor}">${margem.toFixed(1)}%</td>
+      <td><span class="tag ${tagClass}">${tag}</span></td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  calcMeta();
+  calcMetas();
+}
+
+function switchTab(tab) {
+  const isCalc = tab === 'calc';
+  document.getElementById('panel-calc').style.display  = isCalc ? '' : 'none';
+  document.getElementById('panel-metas').style.display = isCalc ? 'none' : '';
+
+  const btnCalc  = document.getElementById('tab-calc');
+  const btnMetas = document.getElementById('tab-metas');
+  const activeStyle   = 'font-family:var(--body);font-size:13px;font-weight:500;padding:8px 20px;border:none;border-radius:9px;cursor:pointer;background:var(--text);color:var(--bg);transition:all 0.15s;';
+  const inactiveStyle = 'font-family:var(--body);font-size:13px;font-weight:500;padding:8px 20px;border:none;border-radius:9px;cursor:pointer;background:transparent;color:var(--text-muted);transition:all 0.15s;';
+  btnCalc.style.cssText  = isCalc ? activeStyle : inactiveStyle;
+  btnMetas.style.cssText = isCalc ? inactiveStyle : activeStyle;
+
+  if (!isCalc) calcMetas();
+}
+
+function calcMetas() {
+  const maxA   = 60;
+  const nMeta  = Math.max(1, gv('alunos_turma') || 15);
+  const nVend  = Math.max(1, gv('qtde_vendedores') || 1);
+  const salVend = gv('salario_vendedor');
+  const encVend = gv('encargos_vendedor') / 100;
+  const custoVendBase = nVend * salVend * (1 + encVend); // salário já incluído no calcRow
+
+  // Find break-even (sem comissão extra da aba metas — usa o calcRow normal)
+  let be = null;
+  for (let a = 1; a <= maxA; a++) {
+    if (calcRow(a).resultado >= 0) { be = a; break; }
+  }
+
+  const gatilho = 14; // fixo: sem comissão abaixo de 14 alunos
+
+  document.getElementById('mv-be').textContent         = be !== null ? be + ' alunos' : '> ' + maxA;
+  document.getElementById('mv-gatilho').textContent    = gatilho + ' alunos';
+  document.getElementById('mv-meta-cheia').textContent = nMeta + ' alunos';
+
+  const comF1    = gv('com_f1');
+  const comF2    = gv('com_f2');
+  const comF3    = gv('com_f3');
+  const comBonus = gv('com_bonus');
+
+  // Faixas fixas: <14 = sem comissão; 14–20 = F1 (R$30); 21–25 = F2 (R$40); 26+ = F3 (R$50)
+  const f1Max = 20;
+  const f2Max = 25;
+
+  function getFaixa(a) {
+    if (a < gatilho) return { nome: 'Sem comissão', comPorAluno: 0, bonus: 0, label: '—', cls: 'tag-bad' };
+    if (a <= f1Max)  return { nome: 'Faixa 1 · Início', comPorAluno: comF1, bonus: 0, label: 'F1', cls: 'tag' };
+    if (a <= f2Max)  return { nome: 'Faixa 2 · Aceleração', comPorAluno: comF2, bonus: 0, label: 'F2', cls: '' };
+    if (a === nMeta) return { nome: 'Faixa 3 · Meta cheia', comPorAluno: comF3, bonus: comBonus, label: 'F3 + Bônus', cls: 'tag-ok' };
+    return { nome: 'Faixa 3 · Acima da meta', comPorAluno: comF3, bonus: comBonus, label: 'F3 + Bônus', cls: 'tag-ok' };
+  }
+
+  // Build row steps: key milestones + regular steps
+  const milestones = new Set();
+  if (be) milestones.add(be);
+  if (gatilho) milestones.add(gatilho);
+  if (f1Max > 0 && f1Max < nMeta) milestones.add(f1Max);
+  if (f2Max > 0 && f2Max < nMeta) milestones.add(f2Max);
+  milestones.add(nMeta);
+  if (nMeta + 5 <= maxA) milestones.add(nMeta + 5);
+
+  const baseSteps = [1,2,3,5,8,10,12,15,18,20,25,30,35,40,45,50].filter(a => a <= maxA);
+  const steps = [...new Set([...baseSteps, ...milestones])].sort((a,b) => a-b);
+
+  const tbody = document.getElementById('metas-tbody');
+  tbody.innerHTML = '';
+
+  const tdB = 'padding:9px 16px;font-family:var(--mono);font-size:12px;border-bottom:1px solid var(--border-light);text-align:right;vertical-align:middle;';
+  const tdL = tdB + 'text-align:left;font-weight:500;color:var(--text);';
+
+  for (const a of steps) {
+    const r = calcRow(a);
+    const faixa = getFaixa(a);
+    const comTotalVend = a * faixa.comPorAluno + faixa.bonus;
+    const comPorVend   = nVend > 0 ? comTotalVend / nVend : 0;
+    const ganhoVend    = salVend + comPorVend;
+    const pctReceita   = r.rec_bruta > 0 ? (comTotalVend / r.rec_bruta * 100) : 0;
+
+    const isBe   = be !== null && a === be;
+    const isMeta = a === nMeta;
+    const isGat  = gatilho !== null && a === gatilho;
+
+    let rowBg = '';
+    if (isMeta) rowBg = 'background:var(--green-bg);';
+    else if (isBe) rowBg = 'background:var(--amber-bg);';
+    else if (isGat) rowBg = 'background:rgba(26,107,74,0.04);';
+
+    let statusTag, statusCls;
+    if (isBe)        { statusTag = 'Break-even'; statusCls = 'tag-be'; }
+    else if (isMeta) { statusTag = 'Meta cheia'; statusCls = 'tag-ok'; }
+    else if (r.resultado > 0) { statusTag = 'Viável'; statusCls = 'tag-ok'; }
+    else             { statusTag = 'Prejuízo'; statusCls = 'tag-bad'; }
+
+    const tr = document.createElement('tr');
+    tr.style.cssText = rowBg;
+    const resultadoAntes  = r.resultado; // empresa antes da comissão extra da aba metas
+    const margemAntes     = r.rec_bruta > 0 ? (resultadoAntes / r.rec_bruta * 100) : 0;
+    const resultadoDepois = r.resultado - comTotalVend;
+    const margemDepois    = r.rec_bruta > 0 ? (resultadoDepois / r.rec_bruta * 100) : 0;
+    const impactoComissao = resultadoDepois - resultadoAntes; // sempre negativo
+    tr.innerHTML = `
+      <td style="${tdL}">${faixa.nome}${isMeta?' ★':''}</td>
+      <td style="${tdB}font-weight:600;">${a}</td>
+      <td style="${tdB}">${fmtR(r.rec_bruta)}</td>
+      <td style="${tdB}font-weight:500;background:rgba(0,0,0,0.02);color:${resultadoAntes>=0?'var(--green)':'var(--red)'};">${fmtR(resultadoAntes)}</td>
+      <td style="${tdB}background:rgba(0,0,0,0.02);color:${margemAntes>=0?'var(--green)':'var(--red)'};">${margemAntes.toFixed(1)}%</td>
+      <td style="${tdB}color:var(--green);font-weight:500;">${comPorVend > 0 ? fmtR(comPorVend) : '—'}</td>
+      <td style="${tdB}color:var(--green);">${fmtR(ganhoVend)}</td>
+      <td style="${tdB}color:${pctReceita<=8?'var(--green)':pctReceita<=15?'var(--amber)':'var(--red)'};">${pctReceita > 0 ? pctReceita.toFixed(1)+'%' : '—'}</td>
+      <td style="${tdB}font-weight:600;background:rgba(255,200,0,0.05);color:${resultadoDepois>=0?'var(--green)':'var(--red)'};">${fmtR(resultadoDepois)}</td>
+      <td style="${tdB}background:rgba(255,200,0,0.05);color:${margemDepois>=0?'var(--green)':'var(--red)'};">${margemDepois.toFixed(1)}%</td>
+      <td style="${tdB}background:rgba(255,200,0,0.05);color:var(--red);">${comTotalVend > 0 ? fmtR(impactoComissao) : '—'}</td>
+      <td style="${tdB}"><span class="tag ${statusCls}">${statusTag}</span></td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  // Regra resumida
+  document.getElementById('mv-regra-txt').innerHTML =
+    `<strong>Regra de comissionamento:</strong> &nbsp;Sem comissão abaixo de ${gatilho} alunos. &nbsp;|&nbsp; `+
+    `<strong>Faixa 1</strong> (${gatilho}–${f1Max} alunos): R$ ${comF1}/aluno. &nbsp;|&nbsp; `+
+    `<strong>Faixa 2</strong> (${f1Max+1}–${f2Max} alunos): R$ ${comF2}/aluno. &nbsp;|&nbsp; `+
+    `<strong>Faixa 3</strong> (${f2Max+1}+ alunos): R$ ${comF3}/aluno${comBonus > 0 ? ' + bônus R$ ' + comBonus + ' por turma cheia' : ''}.`;
+
+  // Política sugerida
+  const rMeta  = calcRow(nMeta);
+  const comMetaTotal = nMeta * comF3 + comBonus;
+  const resultMeta   = rMeta.resultado - comMetaTotal;
+  const margemMeta   = rMeta.rec_bruta > 0 ? (resultMeta / rMeta.rec_bruta * 100).toFixed(1) : '—';
+  const ganhoMetaVend = salVend + (nMeta * comF3 + comBonus) / nVend;
+
+  document.getElementById('mv-politica').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+      <div>
+        <p style="font-weight:600;color:var(--text);margin-bottom:8px;">📋 Estrutura do plano</p>
+        <p>• <strong>Salário fixo:</strong> R$ ${Math.round(salVend).toLocaleString('pt-BR')}/mês por vendedor</p>
+        <p>• <strong>Gatilho de ativação:</strong> a partir de ${gatilho} alunos matriculados no mês</p>
+        <p>• <strong>Faixa 1</strong> (${gatilho}–${f1Max} alunos): R$ ${comF1} por aluno</p>
+        <p>• <strong>Faixa 2</strong> (${f1Max+1}–${f2Max} alunos): R$ ${comF2} por aluno</p>
+        <p>• <strong>Faixa 3</strong> (${f2Max+1}+ alunos): R$ ${comF3} por aluno${comBonus > 0 ? ' + bônus R$ ' + Math.round(comBonus).toLocaleString('pt-BR') : ''}</p>
+      </div>
+      <div>
+        <p style="font-weight:600;color:var(--text);margin-bottom:8px;">📊 Impacto na meta cheia (${nMeta} alunos)</p>
+        <p>• <strong>Resultado empresa:</strong> ${fmtR(resultMeta)}/mês &nbsp;(margem ${margemMeta}%)</p>
+        <p>• <strong>Ganho total do vendedor:</strong> ${fmtR(ganhoMetaVend)}/mês (fixo + comissão rateada)</p>
+        <p>• <strong>Custo total de comissão:</strong> ${fmtR(comMetaTotal)}</p>
+        <p style="margin-top:10px;color:var(--text-hint);font-size:12px;">💡 As faixas são fixas e independem do break-even: o gatilho de 14 alunos garante volume mínimo antes de ativar comissão. A progressão cria urgência para fechar mais alunos.</p>
+      </div>
+    </div>
+  `;
+}
+
+
+function calcMeta() {
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+  const cursos = [
+    { key: 'arCond',      nome: 'Ar Cond.',      orcado: [0,0,0,10485,20970,20970,20970,31455,31455,31455,31455,31455],      preco: 699,   inadim: 0.10, roy: 0.00 },
+    { key: 'sobrancelha', nome: 'D. Sobrancelha', orcado: [0,0,0,10485,20970,20970,20970,20970,31455,31455,31455,31455],      preco: 699,   inadim: 0.10, roy: 0.10 },
+    { key: 'cilios',      nome: 'Ext. Cílios',    orcado: [0,0,0,10485,10485,10485,10485,20970,20970,20970,20970,20970],      preco: 699,   inadim: 0.10, roy: 0.10 },
+    { key: 'eletrica',    nome: 'Inst. Elétr.',   orcado: [0,0,0,10485,10485,10485,20970,20970,20970,31455,31455,31455],      preco: 699,   inadim: 0.10, roy: 0.00 },
+    { key: 'camera',      nome: 'Câmera',          orcado: [0,0,0,10485,10485,10485,20970,20970,20970,20970,20970,20970],      preco: 699,   inadim: 0.10, roy: 0.00 },
+    { key: 'eja',         nome: 'EJA',             orcado: [0,0,0,0,0,3495,6990,10485,13980,17475,20970,27960],               preco: 699,   inadim: 0.05, roy: 0.00 },
+    { key: 'tec',         nome: 'Téc. Integrado',  orcado: [0,0,0,0,0,12870,68640,128700,205920,321750,321750,321750],        preco: 772.20,inadim: 0.10, roy: 0.00 },
+    { key: 'sup',         nome: 'Ens. Superior',   orcado: [4276,6413,8551,8968,9385,9802,10219,10219,10219,10219,10219,10219],preco: 68,    inadim: 0.05, roy: 0.00 },
+  ];
+
+  const totalConsolidado = [391.98,940.75,2032.94,56949.41,81055.25,99772.13,183728.96,273345.76,370615.52,507473.27,518016.01,532053.76];
+
+  const thead = document.getElementById('meta-thead');
+  const tbody = document.getElementById('meta-table-body');
+  const tfoot = document.getElementById('meta-tfoot');
+
+  const thStyle = 'padding:8px 10px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-hint);background:var(--bg);border-bottom:1px solid var(--border-light);text-align:center;white-space:nowrap;';
+  const thLeft  = thStyle + 'text-align:left;';
+
+  let headHtml = `<tr><th style="${thLeft}">Mês</th><th style="${thStyle}">Total orçado</th>`;
+  for (const c of cursos) headHtml += `<th style="${thStyle}">${c.nome}</th>`;
+  headHtml += `<th style="${thStyle + 'background:var(--surface2);'}">Total matrículas</th>`;
+  headHtml += '</tr>';
+  thead.innerHTML = headHtml;
+
+  tbody.innerHTML = '';
+  const totalPorCurso = new Array(cursos.length).fill(0);
+  const totalMatMes = new Array(12).fill(0);
+  let grandTotal = 0;
+
+  for (let i = 0; i < 12; i++) {
+    const totalMes = totalConsolidado[i];
+    grandTotal += totalMes;
+
+    const tr = document.createElement('tr');
+    let html = '';
+
+    const tdBase = 'padding:8px 10px;font-family:var(--mono);font-size:12px;border-bottom:1px solid var(--border-light);text-align:center;';
+    const tdLeft = tdBase + 'text-align:left;font-weight:500;color:var(--text);';
+    const tdTotal = tdBase + 'font-weight:500;color:var(--text);background:var(--bg);';
+
+    html += `<td style="${tdLeft}">${meses[i]}</td>`;
+    html += `<td style="${tdTotal}">R$ ${Math.round(totalMes).toLocaleString('pt-BR')}</td>`;
+
+    for (let j = 0; j < cursos.length; j++) {
+      const c = cursos[j];
+      const orcadoCurso = c.orcado[i];
+
+      if (orcadoCurso === 0 || totalMes === 0) {
+        html += `<td style="${tdBase}color:var(--text-hint);">—</td>`;
+        continue;
+      }
+
+      const proporcao = orcadoCurso / totalMes;
+      const metaCurso = totalMes * proporcao;
+      const recUnit = c.preco * (1 - c.inadim) * (1 - c.roy);
+      const alunos = recUnit > 0 ? Math.ceil(metaCurso / recUnit) : 0;
+      totalPorCurso[j] += alunos;
+      totalMatMes[i] += alunos;
+
+      const cor = alunos <= 15 ? 'var(--green)' : alunos <= 30 ? 'var(--amber)' : 'var(--red)';
+      html += `<td style="${tdBase}font-weight:600;color:${cor};">${alunos}</td>`;
+    }
+
+    const totalLinha = totalMatMes[i];
+    html += `<td style="${tdTotal}font-weight:700;color:var(--text);">${totalLinha > 0 ? totalLinha : '—'}</td>`;
+
+    tr.innerHTML = html;
+    tbody.appendChild(tr);
+  }
+
+  const tfStyle = 'padding:10px 10px;font-family:var(--mono);font-size:12px;font-weight:600;text-align:center;border-top:2px solid var(--border);background:var(--bg);color:var(--text);';
+  const tfLeft  = tfStyle + 'text-align:left;';
+  const tfTotal = tfStyle + 'background:var(--surface2);';
+
+  let footHtml = `<tr><td style="${tfLeft}">Total ano</td><td style="${tfTotal}">R$ ${Math.round(grandTotal).toLocaleString('pt-BR')}</td>`;
+  let grandTotalAlunos = 0;
+  for (let j = 0; j < cursos.length; j++) {
+    grandTotalAlunos += totalPorCurso[j];
+    const cor = totalPorCurso[j] === 0 ? 'var(--text-hint)' : 'var(--text)';
+    footHtml += `<td style="${tfStyle}color:${cor};">${totalPorCurso[j] > 0 ? totalPorCurso[j] : '—'}</td>`;
+  }
+  footHtml += `<td style="${tfTotal}font-weight:700;color:var(--text);">${grandTotalAlunos}</td>`;
+  footHtml += '</tr>';
+  tfoot.innerHTML = footHtml;
+}
+
+calc();
+</script>
+</body>
+</html>
